@@ -1,0 +1,65 @@
+.mmm-portfolio {
+  font-family: "Roboto", "Helvetica Neue", Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  padding: 10px 0;
+  min-width: 280px;
+}
+
+.mmm-portfolio-loading {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.9em;
+}
+
+.mmm-portfolio-title {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 8px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.mmm-portfolio-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.mmm-portfolio-item {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 6px 0;
+  line-height: 1.4;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.mmm-portfolio-item:last-child {
+  border-bottom: none;
+}
+
+.mmm-portfolio-symbol {
+  font-weight: 600;
+  color: #fff;
+  min-width: 4em;
+}
+
+.mmm-portfolio-price {
+  color: rgba(255, 255, 255, 0.95);
+  font-variant-numeric: tabular-nums;
+}
+
+.mmm-portfolio-change {
+  font-variant-numeric: tabular-nums;
+  font-size: 0.9em;
+}
+
+.mmm-portfolio-change.positive {
+  color: #7cb342;
+}
+
+.mmm-portfolio-change.negative {
+  color: #e57373;
+}
