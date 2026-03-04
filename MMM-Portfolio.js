@@ -14,6 +14,7 @@ Module.register("MMM-Portfolio", {
     showPercent: true,
     decimals: 2,
     currency: "USD",
+    enableLogging: true,
   },
 
   getStyles: function () {
@@ -149,6 +150,34 @@ Module.register("MMM-Portfolio", {
     if (notification === "STOCK_RESULT") {
       this.result = payload;
       this.updateDom(this.config.fadeSpeed);
+    }
+  },
+
+  notificationReceived: function (notification, payload, sender) {
+    if (!this.config.enableLogging) {
+      return;
+    }
+
+    if (notification === "CALENDAR_EVENTS") {
+      this.sendSocketNotification("LOG_EVENT", {
+        type: "calendar_update",
+        message: "Calendar updated",
+        details: {
+          count: Array.isArray(payload) ? payload.length : undefined,
+        },
+      });
+    } else if (
+      notification === "WEATHER_UPDATED" ||
+      notification === "WEATHER_FORECAST" ||
+      notification === "CURRENTWEATHER_DATA"
+    ) {
+      this.sendSocketNotification("LOG_EVENT", {
+        type: "weather_update",
+        message: "Weather updated",
+        details: {
+          notification: notification,
+        },
+      });
     }
   },
 });

@@ -2,11 +2,38 @@
 
 const NodeHelper = require("node_helper");
 const https = require("https");
+const fs = require("fs");
+const path = require("path");
 
 module.exports = NodeHelper.create({
   start: function () {
     console.log(this.name + " helper started.");
     this.cache = {};
+    this.logFile =
+      this.logFile ||
+      path.join(__dirname, "mmm-portfolio-events.log");
+  },
+
+  logEvent: function (entry) {
+    try {
+      const timestamp = new Date().toISOString();
+      const line =
+        "[" +
+        timestamp +
+        "] " +
+        (entry.type || "event") +
+        " " +
+        (entry.message || "") +
+        (entry.details ? " " + JSON.stringify(entry.details) : "") +
+        "\n";
+      fs.appendFile(this.logFile, line, (err) => {
+        if (err) {
+          console.error("MMM-Portfolio: Failed to write log:", err.message);
+        }
+      });
+    } catch (e) {
+      console.error("MMM-Portfolio: Log error:", e.message);
+    }
   },
 
   fetchQuote: function (symbol, apiKey) {
@@ -69,6 +96,11 @@ module.exports = NodeHelper.create({
   fetchAll: async function (symbols, apiKey) {
     const result = {};
     let rateLimited = false;
+    this.logEvent({
+      type: "stock_api_call",
+      message: "Fetching stock quotes",
+      details: { symbols },
+    });
     for (const symbol of symbols) {
       if (rateLimited) {
         if (this.cache[symbol]) result[symbol] = { ...this.cache[symbol], stale: true, staleReason: "rate_limited" };
@@ -114,6 +146,9 @@ module.exports = NodeHelper.create({
       this.fetchAll(symbols, apiKey).then((result) => {
         self.sendSocketNotification("STOCK_RESULT", result);
       });
+    } else if (notification === "LOG_EVENT") {
+      // Generic event logger from front-end (calendar, weather, etc.)
+      this.logEvent(payload || {});
     }
   },
 });
