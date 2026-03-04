@@ -20,6 +20,17 @@ Module.register("MMM-Portfolio", {
     return ["MMM-Portfolio.css"];
   },
 
+  isMarketOpen: function () {
+    const now = new Date();
+    const day = now.getDay(); // 0 = Sun, 6 = Sat
+    if (day === 0 || day === 6) return false;
+    const hours = now.getHours();
+    const minutes = now.getMinutes();
+    const afterOpen = hours > 9 || (hours === 9 && minutes >= 30);
+    const beforeClose = hours < 16;
+    return afterOpen && beforeClose;
+  },
+
   start: function () {
     this.result = {};
     this.getStocks();
@@ -112,6 +123,10 @@ Module.register("MMM-Portfolio", {
   getStocks: function () {
     if (!this.config.apiKey) {
       Log.error("MMM-Portfolio: apiKey is required. Get a free key at https://www.alphavantage.co/support/#api-key");
+      return;
+    }
+    if (!this.isMarketOpen()) {
+      Log.info("MMM-Portfolio: Market closed, skipping API call.");
       return;
     }
     this.sendSocketNotification("GET_STOCKS", {
