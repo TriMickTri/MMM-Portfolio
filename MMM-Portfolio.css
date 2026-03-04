@@ -15,9 +15,24 @@
   text-transform: uppercase;
   letter-spacing: 0.1em;
   color: rgba(255, 255, 255, 0.7);
-  margin-bottom: 8px;
+  margin-bottom: 4px;
   padding-bottom: 4px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.mmm-portfolio-header {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  column-gap: 12px;
+  margin: 4px 0 2px;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.mmm-portfolio-header span {
+  text-align: left;
 }
 
 .mmm-portfolio-list {
@@ -28,7 +43,7 @@
 
 .mmm-portfolio-item {
   display: grid;
-  grid-template-columns: 1fr auto auto auto auto;
+  grid-template-columns: repeat(5, 1fr);
   align-items: baseline;
   column-gap: 12px;
   padding: 6px 0;

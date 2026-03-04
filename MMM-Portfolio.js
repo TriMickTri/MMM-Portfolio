@@ -54,6 +54,16 @@ Module.register("MMM-Portfolio", {
     title.innerHTML = "Portfolio";
     wrapper.appendChild(title);
 
+    const header = document.createElement("div");
+    header.className = "mmm-portfolio-header";
+    const headerLabels = ["SYM", "LOW", "HIGH", "LAST", "CHG"];
+    headerLabels.forEach((label) => {
+      const span = document.createElement("span");
+      span.textContent = label;
+      header.appendChild(span);
+    });
+    wrapper.appendChild(header);
+
     const list = document.createElement("ul");
     list.className = "mmm-portfolio-list";
 
