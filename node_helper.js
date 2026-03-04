@@ -6,6 +6,7 @@ const https = require("https");
 module.exports = NodeHelper.create({
   start: function () {
     console.log(this.name + " helper started.");
+    this.cache = {};
   },
 
   fetchQuote: function (symbol, apiKey) {
@@ -22,6 +23,14 @@ module.exports = NodeHelper.create({
         res.on("end", () => {
           try {
             const data = JSON.parse(body);
+            if (data && (data["Note"] || data["Information"])) {
+              resolve({ symbol, rateLimited: true, message: data["Note"] || data["Information"] });
+              return;
+            }
+            if (data && data["Error Message"]) {
+              resolve({ symbol, notFound: true, message: data["Error Message"] });
+              return;
+            }
             const quote = data["Global Quote"];
             if (quote && quote["01. symbol"]) {
               const rawPercent = quote["10. change percent"];
@@ -29,8 +38,11 @@ module.exports = NodeHelper.create({
               resolve({
                 symbol: quote["01. symbol"],
                 price: quote["05. price"],
+                high: quote["03. high"],
+                low: quote["04. low"],
                 change: quote["09. change"],
                 changePercent: changePercent,
+                asOf: new Date().toISOString(),
               });
             } else {
               console.warn("MMM-Portfolio: No quote for " + symbol, data["Note"] || data["Error Message"] || "");
@@ -56,9 +68,34 @@ module.exports = NodeHelper.create({
 
   fetchAll: async function (symbols, apiKey) {
     const result = {};
+    let rateLimited = false;
     for (const symbol of symbols) {
+      if (rateLimited) {
+        if (this.cache[symbol]) result[symbol] = { ...this.cache[symbol], stale: true, staleReason: "rate_limited" };
+        continue;
+      }
+
       const quote = await this.fetchQuote(symbol, apiKey);
-      if (quote) result[quote.symbol] = quote;
+      if (quote && quote.rateLimited) {
+        console.warn("MMM-Portfolio: Rate limited by Alpha Vantage. Returning cached results where available.");
+        rateLimited = true;
+        if (this.cache[symbol]) result[symbol] = { ...this.cache[symbol], stale: true, staleReason: "rate_limited" };
+        continue;
+      }
+
+      if (quote && quote.notFound) {
+        console.warn("MMM-Portfolio: Symbol not found: " + symbol);
+        if (this.cache[symbol]) result[symbol] = { ...this.cache[symbol], stale: true, staleReason: "symbol_not_found" };
+        continue;
+      }
+
+      if (quote && quote.symbol) {
+        result[quote.symbol] = quote;
+        this.cache[quote.symbol] = { ...quote, stale: false };
+      } else if (this.cache[symbol]) {
+        result[symbol] = { ...this.cache[symbol], stale: true, staleReason: "fetch_failed" };
+      }
+
       // Avoid rate limit (5 requests/min on free tier)
       await new Promise((r) => setTimeout(r, 12000));
     }

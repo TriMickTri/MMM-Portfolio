@@ -48,13 +48,15 @@ Module.register("MMM-Portfolio", {
 
     const data = this.result;
     for (const symbol of this.config.symbols) {
-      if (!data[symbol]) continue;
-
       const item = data[symbol];
-      const price = parseFloat(item.price);
-      const change = parseFloat(item.change);
-      const changePercent = parseFloat(item.changePercent);
-      const isPositive = change >= 0;
+      const hasData = !!item && item.price != null;
+      const price = hasData ? parseFloat(item.price) : NaN;
+      const low = hasData ? parseFloat(item.low) : NaN;
+      const high = hasData ? parseFloat(item.high) : NaN;
+      const change = hasData ? parseFloat(item.change) : NaN;
+      const changePercent = hasData ? parseFloat(item.changePercent) : NaN;
+      const isPositive = hasData ? change >= 0 : true;
+      const isStale = !!item && item.stale;
 
       const li = document.createElement("li");
       li.className = "mmm-portfolio-item";
@@ -63,19 +65,32 @@ Module.register("MMM-Portfolio", {
       symSpan.className = "mmm-portfolio-symbol";
       symSpan.textContent = symbol;
 
+      const lowSpan = document.createElement("span");
+      lowSpan.className = "mmm-portfolio-low" + (isStale ? " stale" : "");
+      lowSpan.textContent = hasData && Number.isFinite(low) ? low.toFixed(this.config.decimals) : "—";
+
+      const highSpan = document.createElement("span");
+      highSpan.className = "mmm-portfolio-high" + (isStale ? " stale" : "");
+      highSpan.textContent = hasData && Number.isFinite(high) ? high.toFixed(this.config.decimals) : "—";
+
       const priceSpan = document.createElement("span");
-      priceSpan.className = "mmm-portfolio-price";
-      priceSpan.textContent = price.toFixed(this.config.decimals);
+      priceSpan.className = "mmm-portfolio-price" + (isStale ? " stale" : "");
+      priceSpan.textContent = hasData && Number.isFinite(price) ? price.toFixed(this.config.decimals) : "—";
 
       li.appendChild(symSpan);
+      li.appendChild(lowSpan);
+      li.appendChild(highSpan);
       li.appendChild(priceSpan);
 
       if (this.config.showChange || this.config.showPercent) {
         const changeSpan = document.createElement("span");
-        changeSpan.className = "mmm-portfolio-change " + (isPositive ? "positive" : "negative");
+        changeSpan.className =
+          "mmm-portfolio-change " +
+          (isPositive ? "positive" : "negative") +
+          (isStale ? " stale" : "");
         const parts = [];
-        if (this.config.showChange) parts.push((isPositive ? "+" : "") + change.toFixed(this.config.decimals));
-        if (this.config.showPercent) parts.push((isPositive ? "+" : "") + changePercent.toFixed(2) + "%");
+        if (hasData && Number.isFinite(change) && this.config.showChange) parts.push((isPositive ? "+" : "") + change.toFixed(this.config.decimals));
+        if (hasData && Number.isFinite(changePercent) && this.config.showPercent) parts.push((isPositive ? "+" : "") + changePercent.toFixed(2) + "%");
         changeSpan.textContent = parts.join(" ");
         li.appendChild(changeSpan);
       }

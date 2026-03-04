@@ -27,10 +27,10 @@
 }
 
 .mmm-portfolio-item {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto auto auto auto;
   align-items: baseline;
-  justify-content: space-between;
-  gap: 12px;
+  column-gap: 12px;
   padding: 6px 0;
   line-height: 1.4;
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
@@ -46,6 +46,12 @@
   min-width: 4em;
 }
 
+.mmm-portfolio-low,
+.mmm-portfolio-high {
+  color: rgba(255, 255, 255, 0.8);
+  font-variant-numeric: tabular-nums;
+}
+
 .mmm-portfolio-price {
   color: rgba(255, 255, 255, 0.95);
   font-variant-numeric: tabular-nums;
@@ -54,6 +60,13 @@
 .mmm-portfolio-change {
   font-variant-numeric: tabular-nums;
   font-size: 0.9em;
+}
+
+.mmm-portfolio-price.stale,
+.mmm-portfolio-low.stale,
+.mmm-portfolio-high.stale,
+.mmm-portfolio-change.stale {
+  opacity: 0.75;
 }
 
 .mmm-portfolio-change.positive {
