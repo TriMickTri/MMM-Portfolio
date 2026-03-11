@@ -101,6 +101,7 @@ module.exports = NodeHelper.create({
       message: "Fetching stock quotes",
       details: { symbols },
     });
+    const startedAt = new Date().toISOString();
     for (const symbol of symbols) {
       if (rateLimited) {
         if (this.cache[symbol]) result[symbol] = { ...this.cache[symbol], stale: true, staleReason: "rate_limited" };
@@ -131,7 +132,7 @@ module.exports = NodeHelper.create({
       // Avoid rate limit (5 requests/min on free tier)
       await new Promise((r) => setTimeout(r, 12000));
     }
-    return result;
+    return { quotes: result, lastFetch: startedAt };
   },
 
   socketNotificationReceived: function (notification, payload) {

@@ -34,6 +34,7 @@ Module.register("MMM-Portfolio", {
 
   start: function () {
     this.result = {};
+    this.lastFetch = null;
     this.getStocks();
     this.scheduleUpdate();
   },
@@ -121,6 +122,14 @@ Module.register("MMM-Portfolio", {
     }
 
     wrapper.appendChild(list);
+
+    if (this.lastFetch) {
+      const ts = document.createElement("div");
+      ts.className = "mmm-portfolio-lastupdate";
+      const d = new Date(this.lastFetch);
+      ts.textContent = "Last stock update: " + d.toLocaleString();
+      wrapper.appendChild(ts);
+    }
     return wrapper;
   },
 
@@ -148,7 +157,12 @@ Module.register("MMM-Portfolio", {
 
   socketNotificationReceived: function (notification, payload) {
     if (notification === "STOCK_RESULT") {
-      this.result = payload;
+      if (payload && payload.quotes) {
+        this.result = payload.quotes;
+        this.lastFetch = payload.lastFetch || null;
+      } else {
+        this.result = payload || {};
+      }
       this.updateDom(this.config.fadeSpeed);
     }
   },

@@ -41,6 +41,12 @@
   padding: 0;
 }
 
+.mmm-portfolio-lastupdate {
+  margin-top: 6px;
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.55);
+}
+
 .mmm-portfolio-item {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
